@@ -27,101 +27,61 @@ Finally, navigate to `http://localhost:5000/` and you should see the API running
 ## MongoDB
 Put the MongoURI string into the default.json file located in ```/config```
 
-The app uses a function called ```initDB()``` located in the server file, that populates the database with dummy data only once. (Checks if the database already has data and wont update on subsequent runs)
+The app uses a function called ```initAndPopulateDB()``` located in the server file, that populates the database with user data types only once. (Checks if the database already has data and wont update on subsequent runs)
 
 ## Models
-```Customer``` 
+```User``` 
 ```typescript 
 //Interface to model the customer Schema for TypeScript.
-@param firstName:string
-@param lastName:string
-@param phone:string
 @param email:string
-@param repairs[]:ref => Repair._id
-@param items[]:ref => Item._id
+@param password:string
+@param avatar:string
+@param userType:ref=> UserType._id
+
  ```
  
-```Item``` 
+```UserType``` 
 ```typescript
 //Interface to model the Item Schema for TypeScript.
-@param itemType:IItemType
-@param itemName:string
-@param itemDescription:string
-@param itemPrice:number
-@param itemQuantity:number
+@param accessRights:string
  ```
 
-```ItemType``` 
+```Post``` 
 ```typescript
 //Interface to model the Item Type schema for TypeScript.
-@param itemType:string
+ * @param title:string
+ * @param content:string
+ * @param author: ref => User._id
+ * @param createdAt:Date
+ * @param updatedAt:Date
  ```
 
-```Repair``` 
-```typescript
-//Interface to model the Repair for schema TypeScript.
-@param customer:ICustomer
-@param description:string
-@param repairDate:Date
-@param repairCost:number
-@param repairStatus:string
-@param item:IItem
- ```
 
 
 ## Routes
-Validation exists on each route, where the interface for the requested structure can be 
-##### Customers
+Validation exists on each route, where the interface for the requested structure is
+##### Auth
 | Route | Description|
 | -----|-----|
-| **POST /customers**| Create new customer|
-| **GET /customers/{id}**| Get customer with Mongo ID|
-| **PUT /customers/{id}**| Update customer with Mongo ID|
-| **DEL /customers/{id}**| Delete customer with Mongo ID|
+| **POST /auth/user**| Create new user from email and password|
+| **GET /auth**| Get protected route with access token in either header, body|
+| **GET /auth/{id}**| Get protected route with access token in either header, body, or param|
 ```json
 {
-  "firstName": "Test",
-  "lastName": "Test2",
-  "phone": "555-555-5555",
-  "email": "sample@gmail.com"
+  "email": "sample@gmail.com",
+  "password": "123456"
 }
 ```
-
-##### Inventory
+##### Posts
 | Route | Description|
 | -----|-----|
-| **POST /inventory**| Create new item|
-| **GET /inventory**| Get all items|
-| **GET /inventory/{id}**| Get item with Mongo ID|
-| **PUT /inventory/{id}**| Update inventory with Mongo ID|
-| **DEL /inventory/{id}**| Delete inventory with Mongo ID|
-
+| **POST /posts**| Create new post from middlewares token|
+| **GET /posts**| Get personal users posts from access token in middleware|
+| **GET /posts/{id}**| Get post with id|
 ```json
 {
-  "category":"bicycles",
-  "itemName" :"item1",
-  "itemPrice": 12,
-  "itemQuantity": 12,
-  "itemDescription": "new bicycle"
-}
-```
-
-##### Repairs
-| Route | Description|
-| -----|-----|
-| **POST /repairs**| Create new repair|
-| **GET /repairs**| Get all repairs|
-| **GET /repairs/{id}**| Get repair with Mongo ID|
-| **PUT /repairs/{id}**| Update repair with Mongo ID|
-| **DEL /repairs/{id}**| Delete repair with Mongo ID|
-| **POST /repairs/{id}/schedule**| Update date for repair with Mongo ID|
-
-```json
-{
-  "customerId": "61a13134bc3881ac4c9e7492", // valid customer id
-  "itemId": "61a13134bc3881ac4c9e7489", // valid item id
-  "date": "12/12/2021",
-  "description": "something broke"
+    "title":"title",
+    "content":"jajamaru"
 }
 ```
 
@@ -140,10 +100,10 @@ The full folder structure of this app is explained below:
 | **dist**           | Contains the distributable (or output) from your TypeScript build                                                                                             |
 | **node_modules**   | Contains all your npm dependencies                                                                                                                            |
 | **src**            | Contains your source code that will be compiled to the dist dir                                                                                               |
-| **src/DbSetup** | Contains the initial data population for database                                                                                                                |
-| **src/helpers** | Contains the helpers for validating Mongo ID's and entities in database                                                                                                                |
-| **src/models**     | Models defined are Customer, Item, ItemType, and Repair                                           |
-| **src/routes**     | Endpoints are /customers, /inventory, /repairs                                                           |
+| **src/database** | Contains the initial data population for database and database connection                                                                                                                |
+| **src/helpers** | Contains the helpers for validating Mongo ID's and user as well as finding token location                                                                                    |
+| **src/models**     | Models defined are User, UserType, Post                                          |
+| **src/routes**     | Endpoints are /auth, /public, /posts                                                           |
 | **src/server.ts**  | Entry point to your express app                                                                                                                               |
 | package.json       | File that contains npm dependencies as well as build scripts                                                  |
 | tsconfig.json      | Config settings for compiling server code written in TypeScript                                                                                               |
@@ -158,7 +118,7 @@ Let's dissect this project's `tsconfig.json`, starting with the `compilerOptions
     "compilerOptions": {
     "module": "commonjs",
     "esModuleInterop": true,
-    "target": "es7",
+    "target": "es6",
     "noImplicitAny": true,
     "moduleResolution": "node",
     "sourceMap": true,
@@ -174,7 +134,7 @@ Let's dissect this project's `tsconfig.json`, starting with the `compilerOptions
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `"module": "commonjs"`       | The **output** module type (in your `.js` files). Node uses commonjs, so that is what we use                                                               |
 | `"esModuleInterop": true,`   | Allows usage of an alternate module import syntax: `import foo from 'foo';`                                                                                |
-| `"target": "es7"`            | The output language level. Node supports ES7, so we can target that here                                                                                   |
+| `"target": "es6"`            | The output language level. Node supports ES6, so we can target that here                                                                                   |
 | `"noImplicitAny": true`      | Enables a stricter setting which throws errors when something has a default `any` value                                                                    |
 | `"moduleResolution": "node"` | TypeScript attempts to mimic Node's module resolution strategy. Read more [here](https://www.typescriptlang.org/docs/handbook/module-resolution.html#node) |
 | `"sourceMap": true`          | We want source maps to be output along side our JavaScript. See the [debugging](#debugging) section                                                        |

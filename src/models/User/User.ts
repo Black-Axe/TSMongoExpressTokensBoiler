@@ -1,6 +1,8 @@
 import { Document, Model, model, Schema } from "mongoose";
 import { IUserType } from "../UserType/UserType";
+import Post, { IPost } from "../Post/Post";
 import UserType from "../UserType/UserType"
+import userTypes from "../UserType/config";
 
 /**
  * Interface to model the User Schema for TypeScript.
@@ -8,12 +10,14 @@ import UserType from "../UserType/UserType"
  * @param password:string
  * @param avatar:string
  * @param userType: ref => UserType._id
+ * @param posts[]: ref => Post._id
  */
 export interface IUser extends Document {
   email: string;
   password: string;
   avatar: string;
   userType: IUserType["_id"];
+  posts: IPost["_id"][];
 }
 
 const userSchema: Schema = new Schema({
@@ -33,12 +37,28 @@ const userSchema: Schema = new Schema({
   avatar: {
     type: String
   },
-   
+  posts: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Post'
+    }
+  ],
   date: {
     type: Date,
     default: Date.now
   }
 });
+
+
+
+userSchema.pre<IUser>("save", async function(next) {
+  // set a users userType to the default userType if it is not set
+  const userType = await UserType.findOne({ accessRights: userTypes.user });
+  if (!this.userType) {
+    this.userType = userType._id;
+  }
+});
+
 
 
 const User = model<IUser>("User", userSchema);

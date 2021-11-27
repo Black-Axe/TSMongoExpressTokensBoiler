@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { validationResult } from "express-validator/check";
-import { Router, Response, Request } from "express";
+import { Router, Response,  } from "express";
 import HttpStatusCodes from "http-status-codes";
 import User, {IUser} from "../../models/User/User";
 import jwt from "jsonwebtoken";
@@ -9,6 +9,7 @@ import gravatar from "gravatar";
 import {getUserByEmail, IValidationObject} from "../../helpers/validateUser";
 import UserType from "../../models/UserType/UserType";
 import userTypes from "../../models/UserType/config";
+import Request from "../../types/Request";
 
 //@route POST auth/user
 //@desc Register user given their email and password, returns the token upon successful registration
@@ -34,14 +35,10 @@ export const registerUser = async (req: Request, res: Response) => {
             r: "pg",
             d: "mm"
         });
-
-        // default the user's type to the default user type of user
-        const userType = await UserType.findOne({ accessRights: userTypes.user });
         const newUser = new User({
             email,
             password,
-            avatar,
-            userType: userType._id            
+            avatar 
         });
         const salt = await bcrypt.genSalt(10);
         newUser.password = await bcrypt.hash(password, salt);
@@ -73,5 +70,6 @@ export const registerUser = async (req: Request, res: Response) => {
 
 
 export const protectedRoute = async (req: Request, res: Response) => {
-    res.json({ msg: "This is a protected route" });
+    //console.log(req.userId);
+    res.json({ msg: "This is a protected route userId" + req.userId  });
 }

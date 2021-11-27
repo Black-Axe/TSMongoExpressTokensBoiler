@@ -1,6 +1,7 @@
 import bodyParser from "body-parser";
 import express from "express";
 import authRoutes from "./routes/auth/authRoutes";
+import postRoutes from "./routes/post/postRoutes";
 
 import {initAndPopulateDB} from "./database/initAndPopulateDB";
 
@@ -22,7 +23,9 @@ app.get("/", (_req, res) => {
   res.send("API Runninng");
 });
 
+
 app.use("/auth", authRoutes);
+app.use("/posts", postRoutes);
 
 const port = app.get("port");
 const server = app.listen(port, () =>
