@@ -1,4 +1,5 @@
 import { Document, Model, model, Schema } from "mongoose";
+import { IUserType } from "../UserType/UserType";
 import UserType from "../UserType/UserType"
 
 /**
@@ -6,14 +7,20 @@ import UserType from "../UserType/UserType"
  * @param email:string
  * @param password:string
  * @param avatar:string
+ * @param userType: ref => UserType._id
  */
 export interface IUser extends Document {
   email: string;
   password: string;
   avatar: string;
+  userType: IUserType["_id"];
 }
 
 const userSchema: Schema = new Schema({
+  userType: {
+    type: Schema.Types.ObjectId,
+    ref: 'UserType'
+},
   email: {
     type: String,
     required: true,
@@ -26,10 +33,7 @@ const userSchema: Schema = new Schema({
   avatar: {
     type: String
   },
-    userType: {
-        type: Schema.Types.ObjectId,
-        ref: 'UserType'
-    },
+   
   date: {
     type: Date,
     default: Date.now

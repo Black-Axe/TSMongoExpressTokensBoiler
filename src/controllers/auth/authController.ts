@@ -7,6 +7,8 @@ import jwt from "jsonwebtoken";
 import config from "config"
 import gravatar from "gravatar";
 import {getUserByEmail, IValidationObject} from "../../helpers/validateUser";
+import UserType from "../../models/UserType/UserType";
+import userTypes from "../../models/UserType/config";
 
 //@route POST auth/user
 //@desc Register user given their email and password, returns the token upon successful registration
@@ -32,11 +34,14 @@ export const registerUser = async (req: Request, res: Response) => {
             r: "pg",
             d: "mm"
         });
+
+        // default the user's type to the default user type of user
+        const userType = await UserType.findOne({ accessRights: userTypes.user });
         const newUser = new User({
             email,
             password,
             avatar,
-            
+            userType: userType._id            
         });
         const salt = await bcrypt.genSalt(10);
         newUser.password = await bcrypt.hash(password, salt);

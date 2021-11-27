@@ -10,8 +10,9 @@ export interface IUserType extends Document {
 
 const UserTypeSchema: Schema = new Schema({
     accessRights: {
-        type: String, //default: 'user',
+        type: String, 
         default: accessTypes.user,
+        required: true,
     }
 });
 
