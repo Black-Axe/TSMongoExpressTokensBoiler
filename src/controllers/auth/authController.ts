@@ -35,7 +35,8 @@ export const registerUser = async (req: Request, res: Response) => {
         const newUser = new User({
             email,
             password,
-            avatar
+            avatar,
+            
         });
         const salt = await bcrypt.genSalt(10);
         newUser.password = await bcrypt.hash(password, salt);
@@ -46,8 +47,6 @@ export const registerUser = async (req: Request, res: Response) => {
                 id: newUser.id
             }
         };
-//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjFhMTkxY2JjNGU2NDZhYmY0NWNkZmUxIn0sImlhdCI6MTYzNzk3OTU3OCwiZXhwIjoxNjM4MzM5NTc4fQ.zqyouSiQsB6zY8iecZ1OMUYCJxgfaEZ_0HP2Vl-C4XU"
-
         jwt.sign(
             payload,
             config.get("jwtSecret"),
@@ -67,3 +66,7 @@ export const registerUser = async (req: Request, res: Response) => {
     }
 };
 
+
+export const protectedRoute = async (req: Request, res: Response) => {
+    res.json({ msg: "This is a protected route" });
+}

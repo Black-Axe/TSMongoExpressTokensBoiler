@@ -1,6 +1,6 @@
 
 import express from 'express';
-import {registerUser} from '../../controllers/auth/authController';
+import {registerUser, protectedRoute} from '../../controllers/auth/authController';
 import { UserRegisterMiddleWare } from "../../middleware/UserRegisterMiddleWare";
 import auth from "../../middleware/auth";
 
@@ -11,16 +11,8 @@ const router = express.Router();
 // @access  Public
 router.post('/', UserRegisterMiddleWare, registerUser);
 
-router.get('/', auth, (req, res) => {
-    res.json({
-        msg: 'Auth route'
-    });
-});
-router.get('/:tokenID', auth, (req, res) => {
-    res.json({
-        msg: 'Auth route'
-    });
-});
+router.get('/', auth, protectedRoute);
+router.get('/:tokenID', auth, protectedRoute);
 
 
 export default router;

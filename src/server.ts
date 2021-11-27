@@ -1,25 +1,25 @@
-
 import bodyParser from "body-parser";
 import express from "express";
 import authRoutes from "./routes/auth/authRoutes";
 
-import connectDB from "../config/database";
+import {initAndPopulateDB} from "./database/initAndPopulateDB";
+
 
 const app = express();
 
-// Connect to MongoDB
-connectDB();
+initAndPopulateDB();
 
-// Express configuration
 app.set("port", process.env.PORT || 5000);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+
 
 // @route   GET /
 // @desc    Test Base API
 // @access  Public
 app.get("/", (_req, res) => {
-  res.send("API Running");
+  res.send("API Runninng");
 });
 
 app.use("/auth", authRoutes);
