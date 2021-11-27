@@ -53,12 +53,12 @@ export const registerUser = async (req: Request, res: Response) => {
             payload,
             config.get("jwtSecret"),
             {
-                expiresIn: config.get("jwtExpiration")
+                expiresIn: config.get("jwtExpirationTest")
             },
             (err, token) => {
                 if (err) throw err;
                 res.json({ token,
-                    expiresIn: config.get("jwtExpiration"),
+                    expiresIn: config.get("jwtExpirationTest"),
                 });
             }
         );

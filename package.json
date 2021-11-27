@@ -22,7 +22,8 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.5.7",
     "request": "^2.88.0",
-    "typescript": "^3.4.5"
+    "typescript": "^3.4.5",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
@@ -32,6 +33,7 @@
     "@types/jsonwebtoken": "^8.3.2",
     "@types/mongoose": "^5.5.0",
     "@types/node": "^16.11.10",
+    "@types/uuid": "^8.3.3",
     "concurrently": "^4.1.0",
     "nodemon": "^1.19.0"
   }

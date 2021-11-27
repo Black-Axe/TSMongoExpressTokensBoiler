@@ -1,6 +1,8 @@
 {
   "mongoURI": "mongodb://localhost:27017/testereee",
   "jwtSecret": "jwtSecretToken",
-  "jwtExpiration": 360000
-
+  "jwtExpiration": 360000,
+  "jwtExpirationTest": 20,         
+  "jwtRefreshExpirationTest": 120,
+  "jwtRefreshExpiration": 360000
 }
