@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 import User, { IUser } from '../models/User/User';
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+
 import config from "config";
 
 export interface IValidationObject {
@@ -9,7 +8,6 @@ export interface IValidationObject {
     isValidUser?: boolean;
     message: string;
     user?: IUser; 
-    token?: string;
 }
 
 // helper method to validate if the Id is valid mongoose Id
@@ -71,10 +69,7 @@ export const getUserByEmail = async (email: string): Promise<IValidationObject> 
         }
         validationObject.user = user;
         validationObject.isValidUser = true;
-        //getToken
-        let token: string = getToken(user);
         validationObject.message = 'User exists';
-        validationObject.token = token;
         return validationObject;
     } catch (error) {
         validationObject.message = error.message;
@@ -82,17 +77,4 @@ export const getUserByEmail = async (email: string): Promise<IValidationObject> 
     }
 }
 
-export const getToken = (user: IUser): string => {
-    const payload = {
-        user: {
-            id: user.id
-        }
-    }
-    return jwt.sign(
-        payload,
-        config.get("jwtSecret"),
-        {
-            expiresIn: config.get("jwtExpiration")
-        },
-    );
-}
+

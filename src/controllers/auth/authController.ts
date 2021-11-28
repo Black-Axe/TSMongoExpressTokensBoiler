@@ -11,6 +11,7 @@ import UserType from "../../models/UserType/UserType";
 import userTypes from "../../models/UserType/config";
 import Request from "../../types/Request";
 
+
 //@route POST auth/user
 //@desc Register user given their email and password, returns the token upon successful registration
 //@access Public
@@ -27,7 +28,7 @@ export const registerUser = async (req: Request, res: Response) => {
         let userValidationObject: IValidationObject = await getUserByEmail(email);
         if (userValidationObject.isValidUser) {
             return res.status(HttpStatusCodes.BAD_REQUEST).json({ errors: [{ msg: userValidationObject.message}],
-                token: userValidationObject.token
+                
             });
         }
         const avatar = gravatar.url(email, {
@@ -55,10 +56,61 @@ export const registerUser = async (req: Request, res: Response) => {
             {
                 expiresIn: config.get("jwtExpirationTest")
             },
-            (err, token) => {
+            (err, token)    => {
                 if (err) throw err;
                 res.json({ token,
+                    expiresIn: config.get("jwtExpirationTest")
+                });
+            }
+        );
+    } catch (err) {
+        console.error(err.message);
+        res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).send("Server error");
+    }
+};
+
+export const getTokenFromEmailPass = async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(HttpStatusCodes.BAD_REQUEST).json({ errors: errors.array() });
+    }
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(HttpStatusCodes.BAD_REQUEST).json({ errors: [{ msg: "Please enter all fields" }] });
+    }
+    try {
+        let userValidationObject: IValidationObject = await getUserByEmail(email);
+        if (!userValidationObject.isValidUser) {
+            console.log(userValidationObject.message);
+            console.log(";deeee")
+            return res.status(HttpStatusCodes.BAD_REQUEST).json({ errors: [{ msg: userValidationObject.message}],
+            });
+        }
+        const user = userValidationObject.user;
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(HttpStatusCodes.BAD_REQUEST).json({ errors: [{ msg: "Invalid credentials" }] });  
+        }
+        const payload = {
+            user: {
+                id: user.id
+            }
+        };
+        jwt.sign(
+            payload,
+            config.get("jwtSecret"),
+            {
+                expiresIn: config.get("jwtExpirationTest")
+            },
+            (err, token) => {
+                if (err) throw err;
+                res.json({ 
+                    token,
                     expiresIn: config.get("jwtExpirationTest"),
+                    user: {
+                        id: user.id,
+                        email: user.email,
+                    }
                 });
             }
         );
@@ -69,7 +121,19 @@ export const registerUser = async (req: Request, res: Response) => {
 };
 
 
+
+
+
+
+
 export const protectedRoute = async (req: Request, res: Response) => {
     //console.log(req.userId);
-    res.json({ msg: "This is a protected route userId" + req.userId  });
+    res.json({ msg: "This is a protected route userId" + req.userId,
+        user: req.user,
+        token: req.token,
+        expiresIn: req.expiresIn,
+        expiresAt: req.expiresAt
+
+});
+
 }
