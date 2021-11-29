@@ -1,15 +1,19 @@
-import config from 'config';
+import config from "../../config/defaults";
 import jwt from 'jsonwebtoken';
 import User, { IUser } from '../models/User/User';
 import RefreshToken, {IRefreshToken} from '../models/RefreshToken/RefreshToken';
 import { v4 as uuidv4 } from 'uuid';
 import Payload from "Payload";
 
-const refreshTokenExpiration: number = config.get("RefreshTokenExpirationTest");
+
+const REFRESH_EXPIRATION: number = config.RefreshTokenExpirationTest;
+const JWT_EXPIRATION: string = config.jwtExpirationTest;
+const jwtSecret: string = config.jwtSecret;
+
 
 export function generateAccessToken(payload: object): string {
-
-    return jwt.sign(payload, config.get("jwtSecret"), { expiresIn: config.get("jwtExpirationTest") });
+    //takes expires in as "2m" for example for 2 minutes
+    return jwt.sign(payload, jwtSecret, { expiresIn: JWT_EXPIRATION });
 }
 
 export async function generateRefreshToken(user:IUser){
@@ -18,15 +22,17 @@ export async function generateRefreshToken(user:IUser){
     if(!userInDb){
         return null;
     }
-    let expiredAt = new Date();
-    expiredAt.setSeconds(expiredAt.getSeconds() + refreshTokenExpiration);
+
+    // refresh token logic checking
+    let expiresAt = new Date();
+    expiresAt.setSeconds(expiresAt.getSeconds() + REFRESH_EXPIRATION);
     let _tokenID = uuidv4();
 
     try{
         const newRefreshToken = new RefreshToken({
             user: user._id,
             token: _tokenID,
-            expiryDate: expiredAt,
+            expiryDate: expiresAt,
             createdAt: new Date()
         });
         await newRefreshToken.save();

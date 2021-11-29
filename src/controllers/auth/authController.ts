@@ -2,13 +2,10 @@ import bcrypt from "bcryptjs";
 import { validationResult } from "express-validator/check";
 import {Response} from "express";
 import HttpStatusCodes from "http-status-codes";
-import User from "../../models/User/User";
-import jwt from "jsonwebtoken";
-import config from "config"
-import gravatar from "gravatar";
-import {getUserByEmail, IValidationObject} from "../../helpers/validateUser";
+import {getUserByEmail, IValidator} from "../../helpers/validateUser";
 import Request from "../../types/Request";
-
+import {generateAccessToken, generateRefreshToken} from "../../helpers/generateToken";
+import { IRefreshToken } from "../../models/RefreshToken/RefreshToken";
 
 export const getTokenFromEmailPass = async (req: Request, res: Response) => {
     console.log(req.cookies)
@@ -21,14 +18,13 @@ export const getTokenFromEmailPass = async (req: Request, res: Response) => {
         return res.status(HttpStatusCodes.BAD_REQUEST).json({ errors: [{ msg: "Please enter all fields" }] });
     }
     try {
-        let userValidationObject: IValidationObject = await getUserByEmail(email);
-        if (!userValidationObject.isValidUser) {
-            console.log(userValidationObject.message);
-            console.log(";deeee")
-            return res.status(HttpStatusCodes.BAD_REQUEST).json({ errors: [{ msg: userValidationObject.message}],
+        let userValidator: IValidator = await getUserByEmail(email);
+        if (!userValidator.isValidUser) {
+            console.log(userValidator.message);
+            return res.status(HttpStatusCodes.BAD_REQUEST).json({ errors: [{ msg: userValidator.message}],
             });
         }
-        const user = userValidationObject.user;
+        const user = userValidator.user;
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(HttpStatusCodes.BAD_REQUEST).json({ errors: [{ msg: "Invalid credentials" }] });  
@@ -38,35 +34,15 @@ export const getTokenFromEmailPass = async (req: Request, res: Response) => {
                 id: user.id
             }
         };
-        jwt.sign(
-            payload,
-            config.get("jwtSecret"),
-            {
-                expiresIn: config.get("jwtExpirationTest")
-            },
-            (err, token) => {
-                if (err) throw err;
-                res.json({ 
-                    token,
-                    expiresIn: config.get("jwtExpirationTest"),
-                    user: {
-                        id: user.id,
-                        email: user.email,
-                    }
-                });
-            }
-        );
+        let accessToken = generateAccessToken(payload);
+        let refreshToken = await generateRefreshToken(user) as IRefreshToken;
+        console.log(refreshToken)
+        console.log(accessToken)
     } catch (err) {
         console.error(err.message);
         res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).send("Server error");
     }
 };
-
-
-
-
-
-
 
 export const protectedRoute = async (req: Request, res: Response) => {
     //console.log(req.userId);
@@ -75,7 +51,6 @@ export const protectedRoute = async (req: Request, res: Response) => {
         token: req.token,
         expiresIn: req.expiresIn,
         expiresAt: req.expiresAt
-
-});
+    });
 
 }

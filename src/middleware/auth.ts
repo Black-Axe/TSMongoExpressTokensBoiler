@@ -1,4 +1,3 @@
-import config from "config";
 import { Response, NextFunction } from "express";
 import HttpStatusCodes from "http-status-codes";
 import jwt from "jsonwebtoken";
@@ -8,6 +7,10 @@ import Request from "../types/Request";
 
 import findTokenLocation from "../helpers/findTokenLocation";
 import User from "../models/User/User";
+import config from "../../config/defaults";
+
+const jwtSecretToken: string  = config.jwtSecret;
+const tokenExpire = config.jwtExpirationTest;
 
 export default async function(req: Request, res: Response, next: NextFunction) {
 
@@ -19,19 +22,16 @@ export default async function(req: Request, res: Response, next: NextFunction) {
     });
   }
     try {
-       // let decoded = jwt.decode(token, config.get("jwtSecret"));
-        const payload: Payload | any = jwt.verify(token, config.get("jwtSecret"));
+        const payload: Payload | any = jwt.verify(token, jwtSecretToken);
         let id: string = payload.user.id;
-      //  console.log("PAyload")
-      //  console.log(payload);
+
+        //transfer payload to request object
         req.userId = id;
         req.token = token;
         //convert expiresIn to date
         let expiresAt: Date = new Date(payload.exp * 1000);
-        req.expiresIn = config.get("jwtExpirationTest");
+        
         req.expiresAt = expiresAt;
-
-
         const user = await User.findById(id);
         if (!user) {
             return res.status(HttpStatusCodes.BAD_REQUEST).json({ errors: [{ msg: "User does not exist" }] });

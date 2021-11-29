@@ -1,9 +1,9 @@
-import config from "config";
+import config from "../../config/defaults";
 import { ConnectionOptions, connect } from "mongoose";
 
 const connectDB = async () => {
   try {
-    const mongoURI: string = config.get("mongoURI");
+    const mongoURI: string = config.mongoURI;
     const options: ConnectionOptions = {
       useNewUrlParser: true,
       useCreateIndex: true,
