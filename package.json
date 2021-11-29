@@ -13,6 +13,7 @@
     "heroku-postbuild": "npm run tsc"
   },
   "dependencies": {
+    "@dicebear/avatars-bottts-sprites": "^4.10.1",
     "bcryptjs": "^2.4.3",
     "config": "^3.1.0",
     "express": "^4.16.4",

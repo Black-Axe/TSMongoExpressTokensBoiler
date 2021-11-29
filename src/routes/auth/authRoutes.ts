@@ -1,15 +1,10 @@
 
 import express from 'express';
-import {registerUser, protectedRoute} from '../../controllers/auth/authController';
-import { UserRegisterMiddleWare } from "../../middleware/UserRegisterMiddleWare";
+import {protectedRoute} from '../../controllers/auth/authController';
 import auth from "../../middleware/auth";
 
 const router = express.Router();
 
-// @route   POST /auth
-// @desc    Register user given their email and password, returns the token upon successful registration
-// @access  Public
-router.post('/', UserRegisterMiddleWare, registerUser);
 
 //@route GET /auth
 //@desc protected route
@@ -19,6 +14,6 @@ router.get('/', auth, protectedRoute);
 //@route GET /auth/token
 //@desc private route using token in params
 //@access Private
-router.get('/:tokenID', auth, protectedRoute);
+router.post('/:tokenID', auth, protectedRoute);
 
 export default router;

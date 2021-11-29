@@ -8,14 +8,17 @@ import User, { IUser } from "../User/User";
  * @param token:string
  * @param user: ref => User._id
  * @param expiryDate:Date 
+ * @param createdAt:Date
+ * @param updatedAt:Date
+ * 
  */
  export interface IRefreshToken extends Document {
   token: string;
   user: IUser["_id"];
   expiryDate: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
-
-const jwtRefreshExpiration: number = config.get("jwtRefreshExpirationTest");
 
 const RefreshTokenSchema = new Schema({
   token: String,
@@ -24,24 +27,10 @@ const RefreshTokenSchema = new Schema({
     ref: "User",
   },
   expiryDate: Date,
+    createdAt: Date,
+    updatedAt: Date,
 });
 
-RefreshTokenSchema.statics.createToken = async function (user:IUser) {
-  let expiredAt = new Date();
-    expiredAt.setSeconds(
-    expiredAt.getSeconds() + jwtRefreshExpiration
-  );
-  let _tokenID = uuidv4();
-  let token = new RefreshToken({
-    token: _tokenID,
-    user: user._id,
-    expiryDate: expiredAt.getTime(),
-  });
-  let refreshToken = await token.save();
-
-  console.log(refreshToken);
-  return refreshToken;
-};
 
 RefreshTokenSchema.statics.verifyExpiration = (token) => {
   return token.expiryDate.getTime() < new Date().getTime();
