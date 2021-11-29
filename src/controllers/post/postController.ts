@@ -1,14 +1,6 @@
-import bcrypt from "bcryptjs";
 import { validationResult } from "express-validator/check";
-import { Router, Response,  } from "express";
+import { Response,  } from "express";
 import HttpStatusCodes from "http-status-codes";
-import User, {IUser} from "../../models/User/User";
-import jwt from "jsonwebtoken";
-import config from "config"
-import gravatar from "gravatar";
-import {getUserByEmail, IValidationObject} from "../../helpers/validateUser";
-import UserType from "../../models/UserType/UserType";
-import userTypes from "../../models/UserType/config";
 import Request from "../../types/Request";
 import Post, {IPost} from "../../models/Post/Post";
 

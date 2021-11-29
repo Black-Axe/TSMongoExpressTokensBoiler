@@ -3,7 +3,7 @@ import User, { IUser } from '../models/User/User';
 
 import config from "config";
 
-export interface IValidationObject {
+export interface IValidator {
     isValidId?: boolean;
     isValidUser?: boolean;
     message: string;
@@ -11,69 +11,69 @@ export interface IValidationObject {
 }
 
 // helper method to validate if the Id is valid mongoose Id
-export const validateId = (id: string): IValidationObject => {
-    const validationObject: IValidationObject = {
+export const validateId = (id: string): IValidator => {
+    const validator: IValidator = {
         isValidId: false,
         isValidUser: false,
         message: '',
     };
     if(!id){
-        validationObject.message = 'Id is required';
-        return validationObject;
+        validator.message = 'Id is required';
+        return validator;
     }
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        validationObject.message = 'Invalid Id';
-        return validationObject;
+        validator.message = 'Invalid Id';
+        return validator;
     }
 
-    validationObject.isValidId = true;
-    return validationObject;
+    validator.isValidId = true;
+    return validator;
 };
 
-export const getUserById = async (id: string): Promise<IValidationObject> => {
-    const validationObject: IValidationObject = validateId(id);
-    if (!validationObject.isValidId) {
-        return validationObject;
+export const getUserById = async (id: string): Promise<IValidator> => {
+    const validator: IValidator = validateId(id);
+    if (!validator.isValidId) {
+        return validator;
     }
     try {
         const user: IUser = await User.findById(id);
         if (!user) {
-            validationObject.message = 'User not found';
-            return validationObject;
+            validator.message = 'User not found';
+            return validator;
         }
-        validationObject.user = user;
-        validationObject.isValidUser = true;
-        validationObject.message = 'User exists';
-        return validationObject;
+        validator.user = user;
+        validator.isValidUser = true;
+        validator.message = 'User exists';
+        return validator;
     } catch (error) {
-        validationObject.message = error.message;
-        return validationObject;
+        validator.message = error.message;
+        return validator;
     }
 }
 
-export const getUserByEmail = async (email: string): Promise<IValidationObject> => {
-    const validationObject: IValidationObject = {
+export const getUserByEmail = async (email: string): Promise<IValidator> => {
+    const validator: IValidator = {
         isValidId: false,
         isValidUser: false,
         message: '',
     };
     if(!email){
-        validationObject.message = 'Email is required';
-        return validationObject;
+        validator.message = 'Email is required';
+        return validator;
     }
     try {
         const user: IUser = await User.findOne({ email });
         if (!user) {
-            validationObject.message = 'User not found';
-            return validationObject;
+            validator.message = 'User not found';
+            return validator;
         }
-        validationObject.user = user;
-        validationObject.isValidUser = true;
-        validationObject.message = 'User exists';
-        return validationObject;
+        validator.user = user;
+        validator.isValidUser = true;
+        validator.message = 'User exists';
+        return validator;
     } catch (error) {
-        validationObject.message = error.message;
-        return validationObject;
+        validator.message = error.message;
+        return validator;
     }
 }
 
