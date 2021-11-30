@@ -10,10 +10,10 @@ import User from "../models/User/User";
 import config from "../../config/defaults";
 
 const jwtSecretToken: string  = config.jwtSecret;
-const tokenExpire = config.jwtExpirationTest;
 
 export default async function(req: Request, res: Response, next: NextFunction) {
 
+    //checks params and headers and cookies for token
   const params = req.params.tokenID;  
   let token:string|null = findTokenLocation(req, params);
 

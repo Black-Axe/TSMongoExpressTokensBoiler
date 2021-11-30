@@ -11,7 +11,7 @@ const router = express.Router();
 //@access Private
 router.get('/', auth, protectedRoute);
 
-//@route GET /auth/token
+//@route post /auth/token
 //@desc private route using token in params
 //@access Private
 router.post('/:tokenID', auth, protectedRoute);

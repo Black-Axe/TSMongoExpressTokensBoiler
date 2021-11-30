@@ -1,3 +1,6 @@
+#MongoDB TypeScript Access/Refresh token with cookies boilerplate
+
+
 
 # Prerequisites
 
@@ -32,7 +35,7 @@ The app uses a function called ```initAndPopulateDB()``` located in the server f
 ## Models
 ```User``` 
 ```typescript 
-//Interface to model the customer Schema for TypeScript.
+//Interface to model the user Schema for TypeScript.
 @param email:string
 @param password:string
 @param avatar:string
@@ -42,13 +45,13 @@ The app uses a function called ```initAndPopulateDB()``` located in the server f
  
 ```UserType``` 
 ```typescript
-//Interface to model the Item Schema for TypeScript.
+//Interface to model the user type Schema for TypeScript.
 @param accessRights:string
  ```
 
 ```Post``` 
 ```typescript
-//Interface to model the Item Type schema for TypeScript.
+//Interface to model the Post Type schema for TypeScript.
  * @param title:string
  * @param content:string
  * @param author: ref => User._id
@@ -56,34 +59,113 @@ The app uses a function called ```initAndPopulateDB()``` located in the server f
  * @param updatedAt:Date
  ```
 
+```AccessToken``` 
+```typescript
+//Interface to model the access token schema for TypeScript.
+ * @param token:string
+ * @param user: ref => User._id
+ * @param expiration:Date 
+ * @param createdAt:Date
+ * @param updatedAt:Date
+ * @param refreshToken: ref => RefreshToken._id
+ * @param history: string[]
+ ```
+```Refresh Token``` 
+```typescript
+//Interface to model the RefreshToken Schema for TypeScript.
+ * @param token:string
+ * @param user: ref => User._id
+ * @param expiration:Date 
+ * @param createdAt:Date
+ * @param updatedAt:Date
+ * @param valid: boolean
+ ```
+
 
 
 ## Routes
-Validation exists on each route, where the interface for the requested structure is
-##### Auth
+
+#### Register
+###### **Requires email and password and passwordConfirm
+###### ***Middleware handles validation
+###### ****Controller also sets cookies
 | Route | Description|
 | -----|-----|
-| **POST /auth/user**| Create new user from email and password|
-| **GET /auth**| Get protected route with access token in either header, body|
-| **GET /auth/{id}**| Get protected route with access token in either header, body, or param|
+| **POST /register**| Create new user from email and password|
+
+`POST localhost:5000/register`
 ```json
+
 {
   "email": "sample@gmail.com",
-  "password": "123456"
+  "password": "123456",
+  "passwordConfirm":"123456",
 }
 ```
-##### Posts
+
+`Response`
+```json
+{
+    "user": "61a69c3975d6e0cd34b23f4f",
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjYxYTY5YzM5NzVkNmUwY2QzNGIyM2Y0ZiJ9LCJpYXQiOjE2MzgzMDg5MjIsImV4cCI6MTYzODkxMzcyMn0.0tRxp_Fc_BSrjmBydMgdQuocLVwD0Q0Rpx6qdPY75XA",
+    "refreshToken": "@@rt-a558f8b1-ea6a-4d43-903b-9407866a7bb6-db9337ec61-af6b90cd-c123-4f71-9605-9a315341d3f8@@",
+    "accessTokenExpiration": "12/7/2021, 4:48:42 PM",
+    "refreshTokenExpiration": "1/29/2022, 4:48:42 PM"
+}
+```
+
+#### Posts
+###### ***Middleware handles validation
 | Route | Description|
 | -----|-----|
 | **POST /posts**| Create new post from middlewares token|
 | **GET /posts**| Get personal users posts from access token in middleware|
 | **GET /posts/{id}**| Get post with id|
+`POST localhost:5000/posts`
 ```json
 {
     "title":"title",
     "content":"jajamaru"
 }
 ```
+`Response`
+```json
+{
+    "_id": "61a6ab3ba7278cd1a08149b4",
+    "title": "title",
+    "content": "jajamaru",
+    "author": "61a69c3975d6e0cd34b23f4f",
+    "createdAt": "2021-11-30T22:52:43.412Z",
+    "updatedAt": "2021-11-30T22:52:43.412Z",
+    "__v": 0
+}
+```
+#### Tokens
+###### ***Middleware handles validation
+###### ***Middleware also checks for and sets cookies
+| Route | Description|
+| -----|-----|
+| **POST /token**| Grants new tokens from email and password|
+| **POST /refresh**| Grants new tokens from refresh token|
+`POST localhost:5000/token/refresh`
+
+`
+***Middleware searches headers/params/cookies for token***
+`
+
+`Response`
+```json
+{
+    "grandToken": {
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjYxYTY5YzM5NzVkNmUwY2QzNGIyM2Y0ZiJ9LCJpYXQiOjE2MzgzMTI5NDQsImV4cCI6MTYzODkxNzc0NH0.RixKAD-RslyRriTxvrbbAWHxbJAly7RcGHiclgMn8fA",
+        "refreshToken": "@@rt-279659df-f8ca-41bf-a631-e3517455ba04-3ba8411b18-fa5b1b92-96c9-48a1-915e-591279ef0165@@",
+        "user": "61a69c3975d6e0cd34b23f4f",
+        "accessTokenExpiration": "12/7/2021, 5:55:44 PM",
+        "refreshTokenExpiration": "1/29/2022, 5:59:31 PM"
+    }
+}
+```
+
 
 
 ## Project Structure
@@ -101,9 +183,12 @@ The full folder structure of this app is explained below:
 | **node_modules**   | Contains all your npm dependencies                                                                                                                            |
 | **src**            | Contains your source code that will be compiled to the dist dir                                                                                               |
 | **src/database** | Contains the initial data population for database and database connection                                                                                                                |
-| **src/helpers** | Contains the helpers for validating Mongo ID's and user as well as finding token location                                                                                    |
-| **src/models**     | Models defined are User, UserType, Post                                          |
-| **src/routes**     | Endpoints are /auth, /public, /posts                                                           |
+| **src/helpers** | Contains the helpers for validating Mongo ID's and user as well as finding token location and setting cookies and generating hashed password                                                                                    |
+| **src/middleware** | Contains middleware for login, registration and authentication. Checks for validation of values and for locations of tokens and validity of bearer tokens                                                                     |
+| **src/models**     | Models defined are User, UserType, Post, AccessToken, RefreshToken                                          |
+| **src/routes**     | Endpoints are /register, /auth, /posts, /token                                                           |
+| **src/services**     | Contains token service to handle logic pertaining to accessing tokens from database, creating new tokens and storing in database, and altering validity of tokens in database                                        |
+| **src/utils**     | Contains utility functions designed to help with generating an avatar for the user as well as converting the user to a payload object for signing a new access token                                       |
 | **src/server.ts**  | Entry point to your express app                                                                                                                               |
 | package.json       | File that contains npm dependencies as well as build scripts                                                  |
 | tsconfig.json      | Config settings for compiling server code written in TypeScript                                                                                               |

@@ -8,15 +8,17 @@ import { generatePayload, IPayload } from "../utils/generatePayload";
 import IJwtToken from "../types/IPayload";
 import IGrandToken from "../types/IGrandToken";
 import IRefreshValidator from "IRefreshValidator";
+import crypto from 'crypto';
 
-const REFRESH_EXPIRATION: number = config.RefreshTokenExpirationTest;
-const JWT_EXPIRATION: string = config.jwtExpirationTest;
+//const REFRESH_EXPIRATION: number = config.RefreshTokenExpirationTest;
+const REFRESH_EXPIRATION_DAYS: number = config.RefreshTokenExpirationDays;
+const JWT_EXPIRATION: string = config.jwtExpiration;
 const jwtSecret: string = config.jwtSecret;
 
 //generates or retrieves access token
-export async function generateOrRetrieveAccessToken(user: IUser): Promise<IAccessToken> {
-    //takes expires in as "2m" for example for 2 minutes
 
+export async function generateOrRetrieveAccessToken(user: IUser): Promise<IAccessToken> {
+ 
     //check for existing access token
     let existingAccessToken: IAccessToken = await retrieveAccessToken(user);
     if(existingAccessToken){
@@ -31,22 +33,22 @@ export async function generateOrRetrieveAccessToken(user: IUser): Promise<IAcces
       }
 
 
-    console.log("no existing access token, creating")
+    //console.log("no existing access token, creating")
     // if no existing access token, generate new access token
     return await generateAccessToken(user);
 }
 
 //generates or retrieves refresh token
+//if existing refresh token, create new one
 export async function generateOrRetrieveRefreshToken(user:IUser){
 
     //if existing refresh token update it
     let existingRefreshToken = await retrieveRefreshToken(user);
     if(existingRefreshToken){
         // create new refresh token and push old refresh token to history
-        //console.log("updating existing refresh token")
         let newRefreshToken = await RefreshToken.findOneAndUpdate({user: user._id},
             {$set: {
-            token: uuidv4(),
+            token: generateCryptoToken(),
             valid: true,
             expiration: generateExpirationDate(),
             updatedAt: new Date(),
@@ -60,7 +62,7 @@ export async function generateOrRetrieveRefreshToken(user:IUser){
     try{
         const newRefreshToken = new RefreshToken({
             user: user._id,
-            token: uuidv4(),
+            token: generateCryptoToken(),
             expiration: generateExpirationDate(),
             createdAt: new Date()
         });
@@ -78,14 +80,14 @@ export async function retrieveAccessToken(user:IUser){
     // get accessToken from db
     let accessToken = await AccessToken.findOne({user: user._id});
     if(!accessToken){
-        console.log("no access token found")
+        //console.log("no access token found")
        return false;
     }
     return accessToken;
 
 }
 
-export async function retrieveRefreshToken(user:IUser){
+export async function  retrieveRefreshToken(user:IUser){
     // make sure user exists and is in db
     const userInDb = await User.findById(user._id);
     if(!userInDb){
@@ -116,7 +118,7 @@ export async function generateTokens(user:IUser):Promise<IGrandToken>{
 }
 
 //check refresh token is valid
-export async function generateAccessTokenFromRefreshToken(refreshToken:string){
+export async function generateTokensFromRefreshToken(refreshToken:string){
    // validate and consume refresh token
    let validator = await validateRefreshToken(refreshToken);
     if(!validator.valid){
@@ -136,6 +138,15 @@ export async function generateAccessTokenFromRefreshToken(refreshToken:string){
     let accessToken = await generateOrRetrieveAccessToken(user);
     validator.accessToken = accessToken.token;
 
+    //generate new refresh token
+    let newRefreshToken = await generateOrRetrieveRefreshToken(user) as IRefreshToken;
+    validator.refreshToken = newRefreshToken.token;
+
+    //set expiration dates
+    let accessTokenExpiration = accessToken.expiration;
+    let refreshTokenExpiration = newRefreshToken.expiration;
+    validator.accessTokenExpiration = accessTokenExpiration;
+    validator.refreshTokenExpiration = refreshTokenExpiration;
     return validator;
 
 
@@ -147,7 +158,8 @@ export async function generateAccessTokenFromRefreshToken(refreshToken:string){
          valid: false,
          message: "",
             user: null,
-        accessToken: null
+        accessToken: null,
+        refreshToken: null,
      }
     // get user from refreshToken
     let reToken = await RefreshToken.findOne({token: refreshToken}) as IRefreshToken;
@@ -163,13 +175,13 @@ export async function generateAccessTokenFromRefreshToken(refreshToken:string){
         return refreshValidator;
     }
     if(reToken.expiration < new Date()){
-        refreshValidator.message = "refresh token has expired " + reToken.expiration.toLocaleString();
+        refreshValidator.message = "refresh token has expired " + reToken.expiration.toLocaleString() + " please authenticate";
         // set refresh token to invalid
         return refreshValidator;
     }
     refreshValidator.valid = true;
 
-    console.log("refresh token is valid");
+    //console.log("refresh token is valid");
     refreshValidator.user = reToken.user;
     return refreshValidator;
 }
@@ -179,7 +191,7 @@ export async function generateAccessTokenFromRefreshToken(refreshToken:string){
     // update refresh token to invalid to reflect it has been used
     let reToken = await RefreshToken.findOneAndUpdate({token: refreshToken}, {valid: false});
     if(!reToken){
-        console.log("no refresh token found in db");
+        //console.log("no refresh token found in db");
         return false;
     }
     return true;
@@ -191,6 +203,7 @@ async function generateAccessToken(user:IUser, existingAccessToken?:IAccessToken
     let jwtToken = jwt.sign(payload, jwtSecret, { expiresIn: JWT_EXPIRATION });
     let decodedJwtToken = jwt.decode(jwtToken) as IJwtToken;
     let timeExpiration = convertJwtTime(decodedJwtToken.exp);
+    //console.log("time expiration: " + timeExpiration);
 
     // if existing access token, update it
     if(existingAccessToken){
@@ -220,13 +233,24 @@ async function generateAccessToken(user:IUser, existingAccessToken?:IAccessToken
     return accessToken;
 }
 
-export function generateExpirationDate(){
+ function generateExpirationDate(){
     let date = new Date();
-    date.setMinutes(date.getMinutes() + REFRESH_EXPIRATION);
+    // add days to date
+    date.setDate(date.getDate() + REFRESH_EXPIRATION_DAYS);
+    //console.log("date: " + date.toLocaleString());
     return date; 
 }
 
-export function convertJwtTime(time: number){
+ export function convertJwtTime(time: number){
     let date = new Date(time*1000);
     return date.toLocaleString();
+}
+
+function generateCryptoToken(){
+    let cryptoToken = crypto.randomBytes(5).toString('hex');
+    let firstid = uuidv4();
+    let secondid = uuidv4();
+
+    let token = "@@rt-"+ firstid + "-" + cryptoToken + "-" + secondid + "@@";
+    return token;
 }

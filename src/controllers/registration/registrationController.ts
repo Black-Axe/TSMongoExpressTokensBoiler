@@ -4,14 +4,11 @@ import HttpStatusCodes from "http-status-codes";
 import User, {IUser} from "../../models/User/User";
 import Request from "../../types/Request";
 import {Response} from "express";
-import jwt from "jsonwebtoken";
 import generateAvatar from "../../utils/generateAvatar";
 import { generateTokens } from "../../services/TokenService";
-import Payload from "IPayload";
-import { IRefreshToken } from "../../models/Token/RefreshToken/RefreshToken";
-import {generatePayload} from "../../utils/generatePayload";
 import IGrandToken from "IGrandToken";
-
+import config from "../../../config/defaults";
+import { bakeCookies } from "../../helpers/cookies/bakeCookies";
 
 //@route POST register/
 //@desc Register user given their email and password, returns the token upon successful registration
@@ -25,6 +22,8 @@ export const registerUserWithEmailPass = async (req: Request, res: Response) => 
         newUser.password = await generateHashedPass(password);
         await newUser.save();
         let grandToken: IGrandToken = await generateTokens(newUser);
+        //set the cookies
+        await bakeCookies(res, grandToken);
         res.status(HttpStatusCodes.OK).json(grandToken);
     } catch (err) {
         console.log("Server error cannot create user");
