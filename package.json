@@ -15,6 +15,7 @@
   "dependencies": {
     "@dicebear/avatars-bottts-sprites": "^4.10.1",
     "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
     "express": "^4.16.4",
     "express-validator": "^5.3.1",
     "gravatar": "^1.8.0",

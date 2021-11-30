@@ -1,18 +1,23 @@
-import { findRefreshTokenLocation } from '../helpers/findTokenLocation';
+import { findRefreshTokenLocation } from '../helpers/token/findTokenLocation';
 import { Response, NextFunction } from "express";
 import HttpStatusCodes from "http-status-codes";
-import Request from "../types/Request";
+import Request from "Request";
 import User from "../models/User/User";
 
 
-export default async function(req: Request, res: Response, next: NextFunction) {
+export default async function refreshMiddleWare(req: Request, res: Response, next: NextFunction) {
     const params = req.params.tokenID;
-    let token:String|null = findRefreshTokenLocation(req, params);
+    let token:string|null = findRefreshTokenLocation(req, params);
     if(!token) {
         res.status(HttpStatusCodes.BAD_REQUEST).json({
-            message: "Invalid token"
+            message: "No refresh token found"
         });
-        return;
     }
+
+    // attach refresh token to the request
+    req.refreshToken = token;
+    
+    next();
+
 }
     // finish this  

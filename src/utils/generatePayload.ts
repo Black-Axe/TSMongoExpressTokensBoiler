@@ -1,6 +1,6 @@
 import {IUser} from "../models/User/User";
 
-interface IPayload {
+export interface IPayload {
     user: {
         _id: string;
     };

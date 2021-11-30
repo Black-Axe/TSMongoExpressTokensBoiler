@@ -4,10 +4,10 @@
  * @param token:string
  * @param expiresIn:string
  */
- type payload = { 
+ type IPayload = { 
      userId: string;
      iat: number;
      exp: number;
     };
 
- export default payload;
+ export default IPayload;

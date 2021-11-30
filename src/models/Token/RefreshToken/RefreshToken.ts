@@ -1,23 +1,26 @@
 import mongoose, { Document, Model, model, Schema } from "mongoose";
 import { v4 as uuidv4 } from 'uuid';
 import config from "config";
-import User, { IUser } from "../User/User";
+import User, { IUser } from "../../User/User";
 
 /**
  * Interface to model the RefreshToken Schema for TypeScript.
  * @param token:string
  * @param user: ref => User._id
- * @param expiryDate:Date 
+ * @param expiration:Date 
  * @param createdAt:Date
  * @param updatedAt:Date
+ * @param valid: boolean
  * 
  */
  export interface IRefreshToken extends Document {
   token: string;
   user: IUser["_id"];
-  expiryDate: Date;
+  expiration: Date;
   createdAt: Date;
   updatedAt: Date;
+  valid: boolean;
+  history: string[];
 }
 
 const RefreshTokenSchema = new Schema({
@@ -26,10 +29,15 @@ const RefreshTokenSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "User",
   },
-  expiryDate: Date,
+  expiration: Date,
     createdAt: Date,
     updatedAt: Date,
-});
+    valid: {
+      type: Boolean, 
+      default: true,
+  },
+  history: [String],
+ });
 
 
 RefreshTokenSchema.statics.verifyExpiration = (token) => {

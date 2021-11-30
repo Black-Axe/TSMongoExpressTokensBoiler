@@ -2,10 +2,10 @@ import { Response, NextFunction } from "express";
 import HttpStatusCodes from "http-status-codes";
 import jwt from "jsonwebtoken";
 
-import Payload from "../types/Payload";
-import Request from "../types/Request";
+import Payload from "../types/IPayload";
+import Request from "Request";
 
-import findTokenLocation from "../helpers/findTokenLocation";
+import findTokenLocation from "../helpers/token/findTokenLocation";
 import User from "../models/User/User";
 import config from "../../config/defaults";
 
@@ -16,6 +16,7 @@ export default async function(req: Request, res: Response, next: NextFunction) {
 
   const params = req.params.tokenID;  
   let token:string|null = findTokenLocation(req, params);
+
   
   if(!token){
     return res.status(HttpStatusCodes.BAD_REQUEST).json({errors: [{msg: "No token found in request"}]
@@ -23,13 +24,13 @@ export default async function(req: Request, res: Response, next: NextFunction) {
   }
     try {
         const payload: Payload | any = jwt.verify(token, jwtSecretToken);
-        let id: string = payload.user.id;
+        let id: string = payload.user._id;
 
         //transfer payload to request object
         req.userId = id;
         req.token = token;
         //convert expiresIn to date
-        let expiresAt: Date = new Date(payload.exp * 1000);
+        let expiresAt = new Date(payload.exp * 1000).toLocaleString();
         
         req.expiresAt = expiresAt;
         const user = await User.findById(id);
@@ -43,7 +44,7 @@ export default async function(req: Request, res: Response, next: NextFunction) {
         return res.status(HttpStatusCodes.UNAUTHORIZED).json({
             errors: [
                 {
-                    msg: error.message == "jwt expired" ? "Token expired" : "invalid token"
+                    msg: error.message == "jwt expired" ? "Token expired make request with refresh token for new one. Or please login again" : "invalid token"
                 }
             ]
         });

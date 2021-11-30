@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import User, { IUser } from '../models/User/User';
+import User, { IUser } from '../../models/User/User';
 
 import config from "config";
 

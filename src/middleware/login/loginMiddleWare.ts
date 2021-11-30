@@ -1,6 +1,6 @@
 import { NextFunction, Response} from "express";
 import { validationResult } from "express-validator/check";
-import { IValidator, getUserByEmail } from "../../helpers/validateUser";
+import { IValidator, getUserByEmail } from "../../helpers/user/validateUser";
 import Request from "../../types/Request";
 import  HttpStatusCodes  from "http-status-codes";
 import bcrypt from "bcryptjs";
