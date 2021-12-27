@@ -7,7 +7,6 @@ import {Response} from "express";
 import generateAvatar from "../../utils/generateAvatar";
 import { generateTokens } from "../../services/TokenService";
 import IGrandToken from "IGrandToken";
-import config from "../../../config/defaults";
 import { bakeCookies } from "../../helpers/cookies/bakeCookies";
 
 //@route POST register/

@@ -1,7 +1,6 @@
 import IGrandToken from 'IGrandToken';
 import config from '../../../config/defaults';
 import {Response} from "express";
-import {convertJwtTime} from "../../services/TokenService";
 
 const accessCookie = config.accessCookie;
 const refreshCookie = config.refreshCookie;

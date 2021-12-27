@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import {Response, NextFunction} from "express";
 import Request from "../../types/Request";
-import { validationResult } from "express-validator/check";
+import { validationResult } from "express-validator";
 import HttpStatusCodes from "http-status-codes";
 import { IValidator, getUserByEmail } from "../../helpers/user/validateUser";
 

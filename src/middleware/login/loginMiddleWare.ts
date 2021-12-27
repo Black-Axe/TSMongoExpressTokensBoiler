@@ -1,5 +1,5 @@
 import { NextFunction, Response} from "express";
-import { validationResult } from "express-validator/check";
+import { validationResult } from "express-validator";
 import { IValidator, getUserByEmail } from "../../helpers/user/validateUser";
 import Request from "../../types/Request";
 import  HttpStatusCodes  from "http-status-codes";

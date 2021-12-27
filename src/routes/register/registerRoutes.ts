@@ -1,6 +1,3 @@
-
-
-
 import express from 'express';
 import {registerUserWithEmailPass} from "../../controllers/registration/registrationController";
 import { UserRegisterValidation } from "../../middleware/validation/UserRegisterValidation";

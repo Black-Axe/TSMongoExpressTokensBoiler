@@ -1,4 +1,3 @@
-
 import express from 'express';
 import {protectedRoute} from '../../controllers/auth/authController';
 import auth from "../../middleware/auth";

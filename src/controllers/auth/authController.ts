@@ -1,8 +1,6 @@
 import {Response} from "express";
 import Request from "../../types/Request";
 
-
-
 export const protectedRoute = async (req: Request, res: Response) => {
     //console.log(req.userId);
     res.json({ msg: "This is a protected route userId " + req.userId,

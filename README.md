@@ -1,3 +1,6 @@
+<img width="100%" src="repo/cover.png" />
+
+
 ### MongoDB TypeScript Access/Refresh token with cookies boilerplate
 
 
@@ -252,11 +255,10 @@ Below is a list of all the scripts this template has available:
 | Npm Script     | Description                                                                                   |
 | -------------- | --------------------------------------------------------------------------------------------- |
 | `tsc`          | Transpiles TypeScript codes to JavaScript.                                                    |
-| `watch-tsc`    | Transpiles TypeScript codes to JavaScript, with auto reload.                                  |
-| `deploy`       | Runs node on `dist/server.js` which is the app's entry point.                                 |
-| `watch-deploy` | Runs node on `dist/server.js` which is the app's entry point, with auto reload.               |
-| `server`       | Transpiles TypeScript codes to JavaScript then run node on `dist/server.js` with auto reload. |
-| `start`        | Transpiles TypeScript codes to JavaScript then run node on `dist/server.js`.                  |
+| `build`    | Cleans the previous build folder and rebuilds                                  |
+| `clean`       | Removes old dist folder                |
+| `compile`       | cleans/transpiles and starts the dist server                |
+| `dev`       |runs nodemon on the dist folder, hot reloading on changes made in ts(cleans the old dist folder then rebuilds)                |
 
-Since we're developing with TypeScript, it is important for the codes to be transpiled first to JavaScript before running the node server. It is best to deploy the app using: `npm run server` or `npm run start` command.
+Since we're developing with TypeScript, it is important for the codes to be transpiled first to JavaScript before running the node server. It is best to deploy the app using: `npm run compile` command.
 

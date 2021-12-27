@@ -1,6 +1,5 @@
 import express from 'express';
 import { getTokenFromRefreshToken, getTokenFromEmailPass } from '../../controllers/token/tokenController';
-import auth from "../../middleware/auth";
 import { LoginValidation } from '../../middleware/validation/LoginValidation';
 import loginMiddleWare from '../../middleware/login/loginMiddleWare';
 import refreshMiddleWare from '../../middleware/refreshTokenMiddleware';

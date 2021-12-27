@@ -2,7 +2,6 @@ import { findRefreshTokenLocation } from '../helpers/token/findTokenLocation';
 import { Response, NextFunction } from "express";
 import HttpStatusCodes from "http-status-codes";
 import Request from "Request";
-import User from "../models/User/User";
 
 
 export default async function refreshMiddleWare(req: Request, res: Response, next: NextFunction) {

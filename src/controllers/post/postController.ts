@@ -1,4 +1,4 @@
-import { validationResult } from "express-validator/check";
+import { validationResult } from "express-validator";
 import { Response,  } from "express";
 import HttpStatusCodes from "http-status-codes";
 import Request from "../../types/Request";

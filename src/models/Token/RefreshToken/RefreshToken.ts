@@ -1,7 +1,5 @@
-import mongoose, { Document, Model, model, Schema } from "mongoose";
-import { v4 as uuidv4 } from 'uuid';
-import config from "config";
-import User, { IUser } from "../../User/User";
+import mongoose, { Document, Schema } from "mongoose";
+import { IUser } from "../../User/User";
 
 /**
  * Interface to model the RefreshToken Schema for TypeScript.

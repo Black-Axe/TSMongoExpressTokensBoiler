@@ -1,4 +1,3 @@
-
 import express from 'express';
 import {createPost, viewPosts, viewPost} from '../../controllers/post/postController';
 import { PostValidation } from "../../middleware/validation/PostValidation";
@@ -15,7 +14,5 @@ router.post('/', auth, PostValidation, createPost);
 router.get('/', auth, viewPosts);
 
 router.get('/:id', auth, IDMiddleWare, viewPost);
-
-
 
 export default router;

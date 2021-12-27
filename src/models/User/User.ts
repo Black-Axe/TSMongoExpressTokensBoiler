@@ -1,6 +1,6 @@
-import { Document, Model, model, Schema } from "mongoose";
+import { Document, model, Schema } from "mongoose";
 import { IUserType } from "../UserType/UserType";
-import Post, { IPost } from "../Post/Post";
+import { IPost } from "../Post/Post";
 import UserType from "../UserType/UserType"
 import userTypes from "../UserType/config";
 

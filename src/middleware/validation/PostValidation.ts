@@ -1,5 +1,5 @@
 // middleware for our functions to use to check if fields exist
-import { check } from "express-validator/check";
+import { check } from "express-validator";
 export const PostValidation = [
     check("title", "Title is required").not().isEmpty(),
     check("content", "Content is required").not().isEmpty()
